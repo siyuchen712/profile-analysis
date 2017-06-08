@@ -95,28 +95,32 @@ class ProfileUI(QWidget):
 
     def populate_tc_field_group(self, row):
         ''' Populate GUI with user input TC analysis widgets '''
-        try:
-            self.retrieve_thermocouple_channels()
+        datapath = self.data_file_textfield.text()
+        if datapath and datapath != '(No File Selected)': ## if datapath provided
+            try:
+                self.retrieve_thermocouple_channels()
 
-            ## ambient temp channel field
-            self.amb_chan_label = QLabel('Amb Temp Channel:', self)
-            self.amb_chan_textfield = QLineEdit(self)
-            self.grid.addWidget(self.amb_chan_label, row, 0)
-            self.grid.addWidget(self.amb_chan_textfield, row, 1, 1, 1)
-            row += 1
-
-            ## thermocouple fields
-            for i, channel in enumerate(self.channels):
-                self.add_tc_field(i, channel, row)
+                ## ambient temp channel field
+                self.amb_chan_label = QLabel('Amb Temp Channel:', self)
+                self.amb_chan_textfield = QLineEdit(self)
+                self.grid.addWidget(self.amb_chan_label, row, 0)
+                self.grid.addWidget(self.amb_chan_textfield, row, 1, 1, 1)
                 row += 1
 
-            ## analyze button
-            self.analyze_button = AnalyzeButton('Analyze!', self)
-            self.grid.addWidget(self.analyze_button, row, 0, 1, 4)
+                ## thermocouple fields
+                for i, channel in enumerate(self.channels):
+                    self.add_tc_field(i, channel, row)
+                    row += 1
 
-        except OSError as e: ## no datapath selected
-            print('\n', e)
-            print('Data load error -- Make sure you have selected a valid data file')
+                ## analyze button
+                self.analyze_button = AnalyzeButton('Analyze!', self)
+                self.grid.addWidget(self.analyze_button, row, 0, 1, 4)
+
+            except OSError as e: ## no datapath selected
+                print('\n', e)
+                print('Data load error -- Make sure you have selected a valid data file')
+        else:
+            print('\n', 'Error: path to data file must be provided to load TCs')
 
     def retrieve_thermocouple_channels(self):
         if ( self.data_file_textfield.text() ):
@@ -174,31 +178,33 @@ class AnalyzeButton(QPushButton):
         ## Get user inputs
         test_type = get_test_type(self.ui.ptc_radio, self.ui.tshock_radio)
         datapath = self.ui.data_file_textfield.text()
-        tolerance = int(self.ui.temp_tol_textfield.text())
-        upper_threshold = int(self.ui.upper_temp_textfield.text())
-        lower_threshold = int(self.ui.lower_temp_textfield.text())
+        tolerance = self.ui.temp_tol_textfield.text()
+        upper_threshold = self.ui.upper_temp_textfield.text()
+        lower_threshold = self.ui.lower_temp_textfield.text()
         ambient_channel_number = convert_channel_to_num(self.ui.amb_chan_textfield.text())
         rate_adjustment = self.ui.adjustment_textfield.text()
         title = 'Temperature Profile Analysis'
 
         if rate_adjustment:
-            rate_adjustment = float(self.ui.adjustment_textfield.text())/100.0
+            rate_adjustment = float(self.ui.adjustment_textfield.text())
 
         ## Load TC component/location name labels
         tc_channel_names = {}  ## key: channel, value: tc_name
         for i, channel in enumerate(self.ui.channels):
             tc_channel_names[channel] = self.ui.tc_names[i].text()
 
-        ### Print test parameters
-        print('Test Type:', test_type)
-        print('Datapath:', datapath)
-        print('Upper Threshold:', upper_threshold)
-        print('Lower Threshold:', lower_threshold)
-        print('Channels:', tc_channel_names)
-
         ## if all required user inputs exist
-        if test_type and datapath and upper_threshold and lower_threshold and ambient_channel_number and isinstance(tolerance, int):
+        if test_type and datapath and upper_threshold and lower_threshold and ambient_channel_number and tolerance:
+            upper_threshold, lower_threshold = int(upper_threshold), int(lower_threshold)
+            tolerance = int(tolerance)
             regex_temp, date_format, sep = define_test_parameters(datapath)
+
+            ### Print test parameters
+            print('Test Type:', test_type)
+            print('Datapath:', datapath)
+            print('Upper Threshold:', upper_threshold)
+            print('Lower Threshold:', lower_threshold)
+            print('Channels:', tc_channel_names)
 
             ### Do plot
             df, channels, amb, errors = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep)  ## df time indexed
@@ -210,9 +216,10 @@ class AnalyzeButton(QPushButton):
                 tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format)
             elif test_type == 'PTC':
                 ptc_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format)
+            print('\nANALYSIS COMPLETE.')
         else:
             print('\n', 'All user inputs must be filled before analysis can be conducted. Please fill in the required fields.')
-        print('\nANALYSIS COMPLETE.')
+        
 
 
 ### TC conversion helper

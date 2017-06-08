@@ -35,9 +35,11 @@ def df_instruction(worksheet, row, text):
     col = 0
     # Example
     options = {
-        'font': {'bold': True},
+        'font': {'bold': True, 'color': '#67818a'},
+        'border': {'color': 'red', 'width': 3,
+                   'dash_type': 'round_dot'},
         'width': 512,
-        'height': 100,
+        'height': 100
     }
     worksheet.insert_textbox(row, col, text, options)
     # don't save (wait for other thermocouples)

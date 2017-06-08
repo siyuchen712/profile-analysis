@@ -26,7 +26,7 @@ def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names,
     write_multiple_dfs(writer, [amb_errors, df_summary_amb, result_each_cycle_amb], 'Amb '+str(amb), 3, content_instruction_ambient)
 
     ### all other channels
-    if rate_adjustment or rate_adjustment != 0:  ## apply rate adjustment if supplied and not zero
+    if rate_adjustment:  ## apply rate adjustment if supplied
         temp_adjustment = rate_adjustment*(float(upper_threshold) - float(lower_threshold))/100
         upper_threshold = upper_threshold - temp_adjustment
         lower_threshold = lower_threshold + temp_adjustment
@@ -222,7 +222,7 @@ def single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_th
 
         n_reach_summary = pd.concat(n_reach,axis=0, keys=nr_period)
         n_reach_summary = n_reach_summary[['cycle#', 'Sweep #', 'Time', channel]]
-        content_instruction = ['Only some cycles of this channel can reach the threshold!\n\nThe First Table: List out the summary table based on the period, where some of the cycles are consequtive.', 'The Second Table: List out the calculation result for each cycle of the consequtive period.', 'These cycles cannot reach the threshold: '+str(nr_period)+ '\n\nThe Third Table: List out the key points, which can touch the threshold.']
+        content_instruction = ['Only some cycles of this channel can reach the threshold!\n\nThe First Table: List out the summary table based on the period, where some of the cycles are consecutive.', 'The Second Table: List out the calculation result for each cycle of the consecutive period.', 'These cycles cannot reach the threshold: '+str(nr_period)+ '\n\nThe Third Table: List out the key points, which can touch the threshold.']
 
     return result_each_cycle, df_summary, n_reach_summary, content_instruction
 

@@ -17,9 +17,9 @@ from core.ptc_analysis import *
 py.sign_in('sjbrun','v1jdPUhNoRgRBpAOOx7Y')
 
 #### TSHOCK
-def import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep):
+def import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension):
     ''' Main import function with date index (for plotting) '''
-    df = read_data_for_plot(datapath, date_format, sep=sep)
+    df = read_data_for_plot(datapath, date_format, sep, file_extension)
     channels = get_channels(df, regex_temp)
     amb = set_ambient(channels, ambient_channel_number)
     df, errors = drop_errors(df, channels)
@@ -38,11 +38,17 @@ def import_data_without_date_index(datapath, ambient_channel_number, regex_temp,
 ################################################
 ############### Helper functions ###############
 ################################################
-def read_data_for_plot(datapath, date_format, sep):
+def read_data_for_plot(datapath, date_format, sep, file_extension):
     ''' Returns a dataframe of the agilent temperature data '''
     date_parser = lambda x: pd.datetime.strptime(x, date_format)
-    return pd.read_csv(datapath, parse_dates={'Date Time': [1]}, date_parser=date_parser, 
-                       index_col='Date Time', engine='python', sep=sep)
+    if file_extension == 'csv':
+        return pd.read_csv(datapath, parse_dates={'Date Time': [1]}, date_parser=date_parser, 
+                           index_col='Date Time', engine='python', sep=sep)
+    elif file_extension == 'txt':
+        return pd.read_csv(datapath, parse_dates={'Date Time': [0,1]}, date_parser=date_parser, 
+                           index_col='Date Time', engine='python', sep=sep)
+    else:
+        raise
 
 def read_data_for_analysis(datapath, sep):
     ''' Returns a dataframe of the agilent temperature data '''

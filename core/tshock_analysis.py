@@ -15,8 +15,9 @@ import xlsxwriter
 from core.tshock_helpers import *
 
 
-def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format):
-    writer = create_wb() ## create workbook
+def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name):
+
+    writer = create_wb(test_name) ## create workbook
     
     ## analyze ambient
     amb_upper_threshold = upper_threshold - tolerance
@@ -40,7 +41,10 @@ def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names,
             result_each_cycle, df_summary_tc, n_reach_summary = pd.DataFrame(), pd.DataFrame(), pd.DataFrame() ## ensure reset
             result_each_cycle, df_summary_tc, n_reach_summary, content_instruction = single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_threshold, date_format)
             if tc_channel_names[channel]:
-                tc_name = tc_channel_names[channel] + ' (' + channel.split(' ')[1] + ')'
+                if file_extension == 'csv':
+                    tc_name = tc_channel_names[channel] + ' (' + channel.split(' ')[1] + ')'
+                else:
+                    tc_name = tc_channel_names[channel]
             else:
                 tc_name = channel
             write_multiple_dfs(writer, [df_summary_tc, result_each_cycle, n_reach_summary], tc_name, 3, content_instruction)

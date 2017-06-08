@@ -16,23 +16,23 @@ TEXTFIELD_WIDTH = 3
 ## widget row placement
 TEST_TYPE_ROW = 0
 DATAPATH_ROW = 1
-UPPER_TEMP_ROW = 2
-LOWER_TEMP_ROW = 3
-TOL_ROW = 4
-RT_ADJ_ROW = 5
-LOAD_TC_ROW = 6
-TC_LABELS_ROW = 7
+TEST_NAME_ROW = 2
+UPPER_TEMP_ROW = 3
+LOWER_TEMP_ROW = 4
+TOL_ROW = 5
+RT_ADJ_ROW = 6
+LOAD_TC_ROW = 7
+TC_LABELS_ROW = 8
 
 class ProfileUI(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.test_name = ''
         self.data_file = ''
         self.channels = []
         self.tc_names = []
         self.stylesheet = 'styles\dark.qss'
-        self.width = 400
+        self.width = 500
         self.height = 200
         self.init_ui()
 
@@ -53,6 +53,13 @@ class ProfileUI(QWidget):
         self.data_file_button = FileButton('Select Data File', self.data_file_textfield, self)
         self.grid.addWidget(self.data_file_button, DATAPATH_ROW, 0)
         self.grid.addWidget(self.data_file_textfield, DATAPATH_ROW, 1, 1, TEXTFIELD_WIDTH)
+
+        ## test name
+        self.test_name_label = QLabel('Test Name:', self)
+        self.test_name_label.setFont(QFont("Times", weight=QFont.Bold))
+        self.test_name_textfield = QLineEdit(self)
+        self.grid.addWidget(self.test_name_label, TEST_NAME_ROW, 0)
+        self.grid.addWidget(self.test_name_textfield, TEST_NAME_ROW, 1, 1, 1)
 
         ## upper temperature threshold
         self.upper_temp_label = QLabel('Upper Threshold (\N{DEGREE SIGN}C):', self)
@@ -125,7 +132,7 @@ class ProfileUI(QWidget):
     def retrieve_thermocouple_channels(self):
         if ( self.data_file_textfield.text() ):
             datapath = self.data_file_textfield.text()
-            regex_temp, date_format, sep = define_test_parameters(datapath)
+            regex_temp, date_format, sep, file_extension = define_test_parameters(datapath)
             df_temp = pd.read_csv(datapath, nrows=5, sep=sep)  ## read first 5 rows of datafile
             self.channels = get_channels(df_temp, regex_temp)
         else:
@@ -177,6 +184,7 @@ class AnalyzeButton(QPushButton):
     def analyze(self):
         ## Get user inputs
         test_type = get_test_type(self.ui.ptc_radio, self.ui.tshock_radio)
+        test_name = self.ui.test_name_textfield.text()
         datapath = self.ui.data_file_textfield.text()
         tolerance = self.ui.temp_tol_textfield.text()
         upper_threshold = self.ui.upper_temp_textfield.text()
@@ -194,10 +202,10 @@ class AnalyzeButton(QPushButton):
             tc_channel_names[channel] = self.ui.tc_names[i].text()
 
         ## if all required user inputs exist
-        if test_type and datapath and upper_threshold and lower_threshold and ambient_channel_number and tolerance:
+        if test_name and test_type and datapath and upper_threshold and lower_threshold and ambient_channel_number and tolerance:
             upper_threshold, lower_threshold = int(upper_threshold), int(lower_threshold)
             tolerance = int(tolerance)
-            regex_temp, date_format, sep = define_test_parameters(datapath)
+            regex_temp, date_format, sep, file_extension= define_test_parameters(datapath)
 
             ### Print test parameters
             print('Test Type:', test_type)
@@ -207,15 +215,15 @@ class AnalyzeButton(QPushButton):
             print('Channels:', tc_channel_names)
 
             ### Do plot
-            df, channels, amb, errors = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep)  ## df time indexed
-            plot_profile(title, df, channels, tc_channel_names)  ## plot with ploty
+            df, channels, amb, errors = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension)  ## df time indexed
+            plot_profile(test_name, df, channels, tc_channel_names)  ## plot with ploty
             
             ### Do analysis
             df, channels, amb, amb_errors = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep) ## df raw for analysis
             if test_type == 'Thermal Shock': 
-                tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format)
+                tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
             elif test_type == 'PTC':
-                ptc_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format)
+                ptc_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
             print('\nANALYSIS COMPLETE.')
         else:
             print('\n', 'All user inputs must be filled before analysis can be conducted. Please fill in the required fields.')
@@ -243,7 +251,6 @@ def get_test_type(ptc_widget, tshock_widget):
     return test_type
 
 def define_test_parameters(datapath):
-    ### TO DO --> sense file extension
     file_extension = datapath.split('.')[-1]
     if file_extension == 'csv':
         regex_temp = '^Chan\s[0-9][0-9][0-9]'
@@ -255,7 +262,7 @@ def define_test_parameters(datapath):
         sep = '\t'
     else:
         raise
-    return regex_temp, date_format, sep
+    return regex_temp, date_format, sep, file_extension
 
 if __name__ == '__main__':
     

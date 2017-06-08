@@ -47,10 +47,9 @@ import xlsxwriter
 
 
 
-def create_wb():
-    writer = pd.ExcelWriter('output.xlsx', engine = 'xlsxwriter')
-    #workbook = xlsxwriter.Workbook('output.xlsx')
-    return writer#, workbook
+def create_wb(test_name):
+    writer = pd.ExcelWriter(str(test_name)+'-output.xlsx', engine = 'xlsxwriter')
+    return writer
 
 def write_multiple_dfs(writer, df_list, worksheet_name, spaces, content_instruction):
     row = 5

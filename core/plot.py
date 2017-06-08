@@ -5,7 +5,7 @@ def plot_profile(title, df, channels, tc_channel_names, gl = False):
     data_all = []
     for channel in channels:
         if tc_channel_names[channel]:
-            tc_name = tc_channel_names[channel] + ' (' + channel.split(' ')[1] + ')'
+            tc_name = tc_channel_names[channel]
         else:
             tc_name = channel
         if gl:
@@ -25,4 +25,4 @@ def plot_profile(title, df, channels, tc_channel_names, gl = False):
               xaxis = dict(title = 'Time'),
               yaxis = dict(title = 'Temperature'))
     fig = dict(data=data_all, layout=layout)
-    py.plot(fig, filename='scatter-mode')
+    py.plot(fig, filename=title)

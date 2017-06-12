@@ -60,7 +60,9 @@ def get_channels(df, regular_expression):
 
 def set_ambient(channels, ambient_channel_number):
     ''' Sets the ambient TC from user input integer '''
-    return channels[ambient_channel_number-1]
+    for channel in channels:
+        if str(ambient_channel_number) in channel:
+            return channel
 
 def drop_errors(df, channels):
     ''' Get rid of outrage data and output error list '''
@@ -70,5 +72,3 @@ def drop_errors(df, channels):
         df = df[df[channel] > -100]
     errors = df_copy[~df_copy.index.isin(df.index.tolist())]
     return df, errors
-
-

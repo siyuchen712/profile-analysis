@@ -5,7 +5,9 @@ from core.data_import import *
 
 
 
-datapath = r"C:\Users\s.chen6\Desktop\dat00002.csv"
+datapath = r"C:\Users\s.chen6\Desktop\6_12.csv"
+file_extension = 'csv'
+test_name = 'tbh'
 upper_threshold, lower_threshold = 95, -40
 tolerance = 3
 rate_adjustment = 0
@@ -28,5 +30,5 @@ tc_channel_names = {}
 for chan in channels:
     tc_channel_names[chan] = ''
 #analyze_all_channels(df, channels, amb)
-tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format)
+tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
     

@@ -189,7 +189,7 @@ class AnalyzeButton(QPushButton):
         tolerance = self.ui.temp_tol_textfield.text()
         upper_threshold = self.ui.upper_temp_textfield.text()
         lower_threshold = self.ui.lower_temp_textfield.text()
-        ambient_channel_number = convert_channel_to_num(self.ui.amb_chan_textfield.text())
+        ambient_channel_number = self.ui.amb_chan_textfield.text()
         rate_adjustment = self.ui.adjustment_textfield.text()
         title = 'Temperature Profile Analysis'
 
@@ -202,7 +202,7 @@ class AnalyzeButton(QPushButton):
             tc_channel_names[channel] = self.ui.tc_names[i].text()
 
         ## if all required user inputs exist
-        if test_name and test_type and datapath and upper_threshold and lower_threshold and ambient_channel_number and tolerance:
+        if test_name and test_type and datapath and upper_threshold and lower_threshold and tolerance and len(ambient_channel_number)==3:
             upper_threshold, lower_threshold = int(upper_threshold), int(lower_threshold)
             tolerance = int(tolerance)
             regex_temp, date_format, sep, file_extension= define_test_parameters(datapath)
@@ -213,6 +213,7 @@ class AnalyzeButton(QPushButton):
             print('Upper Threshold:', upper_threshold)
             print('Lower Threshold:', lower_threshold)
             print('Channels:', tc_channel_names)
+            print('Amb Channel:', ambient_channel_number)
 
             ### Do plot
             df, channels, amb, errors = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension)  ## df time indexed
@@ -230,17 +231,7 @@ class AnalyzeButton(QPushButton):
         
 
 
-### TC conversion helper
-def convert_channel_to_num(channel_number):
-    ''' Channel_number input is a  string '''
-    if len(channel_number) > 1:
-        chan_num = int(channel_number[-2:])
-    elif len(channel_number) == 1:
-        chan_num = int(channel_number)
-    else:
-        chan_num = 1
-    return chan_num
-
+### Helpers
 def get_test_type(ptc_widget, tshock_widget):
     if ptc_widget.isChecked():
         test_type = 'PTC'
@@ -263,6 +254,11 @@ def define_test_parameters(datapath):
     else:
         raise
     return regex_temp, date_format, sep, file_extension
+
+def print_errors():
+    pass
+
+
 
 if __name__ == '__main__':
     

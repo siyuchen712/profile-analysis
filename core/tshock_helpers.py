@@ -51,11 +51,11 @@ def soak_analysis(channel_name, amb, ambient, df_chan_Ambient, ls_index_cold, ls
     df_soak_high = ambient.loc[ls_index_hot].sort_values(['Sweep_screen']).reset_index(drop=True)
 
     ## replace first keypoint 0 index with 4
-    reset_start_index_list = [4 if i==0 else i for i in start_index_list]
-    down_i = reset_start_index_list[0]
-    up_i = reset_start_index_list[1]
-    cold_i = reset_start_index_list[2]
-    hot_i = reset_start_index_list[3]
+    #reset_start_index_list = [4 if i==0 else i for i in start_index_list]
+    down_i = start_index_list[0]
+    up_i = start_index_list[1]
+    cold_i = start_index_list[2]
+    hot_i = start_index_list[3]
 
     mean_temp_low, mean_temp_high = [], []
     max_temp_low, max_temp_high = [], []
@@ -63,13 +63,25 @@ def soak_analysis(channel_name, amb, ambient, df_chan_Ambient, ls_index_cold, ls
 
     number_of_cycles = int(ambient.shape[0]/4)
     
-    if channel_name != amb:
-        number_of_cycles -= 1
-
     for i in range(number_of_cycles):
         df_temp_low, df_temp_high = pd.DataFrame(), pd.DataFrame()
-        df_temp_low = df_chan_Ambient.iloc[ambient.iloc[4*i+cold_i]['Sweep_screen']:ambient.iloc[4*i+up_i]['Sweep_screen'],[3]]
-        df_temp_high = df_chan_Ambient.iloc[ambient.iloc[4*i+hot_i]['Sweep_screen']:ambient.iloc[4*i+down_i]['Sweep_screen'],[3]]
+        if cold_i > up_i:
+            up_i += 4
+        if hot_i > down_i:
+            down_i += 4
+
+        cold = 4*i+cold_i
+        up = 4*i+up_i
+        hot = 4*i+hot_i
+        down = 4*i+down_i
+
+        if cold == ambient.shape[0]: cold = cold-1
+        if up == ambient.shape[0]: up = up-1
+        if hot == ambient.shape[0]: hot = hot-1
+        if down == ambient.shape[0]: down = down-1
+
+        df_temp_low = df_chan_Ambient.iloc[ambient.iloc[cold]['Sweep_screen']:ambient.iloc[up]['Sweep_screen'],[3]]
+        df_temp_high = df_chan_Ambient.iloc[ambient.iloc[hot]['Sweep_screen']:ambient.iloc[down]['Sweep_screen'],[3]]
 
         mean_temp_low.append(df_temp_low.mean(axis=0).ix[0])
         mean_temp_high.append(df_temp_high.mean(axis=0).ix[0])
@@ -99,8 +111,7 @@ def calculate_ramp_stats(channel_name, ambient, df_chan_Ambient_loc, date_format
         a1 = ambient['Time'][m+1]
         a2 = ambient['Time'][m]
         time.append((datetime.strptime(a1, date_format) - datetime.strptime(a2, date_format)).total_seconds())
-
-    time.append(0)
+    time.append(np.nan)
     ambient.insert(0,'duration',time)
     ambient['duration_minutes'] = ambient['duration']/60 ## translate duration to minutes
 
@@ -111,6 +122,7 @@ def calculate_ramp_stats(channel_name, ambient, df_chan_Ambient_loc, date_format
     # Find ramp rates
     ambient['ramp_rate'] = pd.Series(0, index=df_chan_Ambient_loc.index)
     ambient['ramp_rate'] = ambient['ramp_temp']*60/ambient['duration']
+
 
     return ambient
 
@@ -130,7 +142,7 @@ def get_points_above_and_below_thresholds(df_chan_Ambient, channel, upper_thresh
 
 
 ########### Keypoints for each cycle
-def get_amb_key_points(df_chan_Ambient_loc):
+def get_amb_key_points(df_chan_Ambient, channel, df_chan_Ambient_loc, upper_threshold, lower_threshold):
     ''' Get key points for ambient channel '''
 
     # gap point
@@ -140,29 +152,55 @@ def get_amb_key_points(df_chan_Ambient_loc):
     result_1['diff_2_sweep#'] = df_chan_Ambient_loc.iloc[:,[0]] - df_chan_Ambient_loc.iloc[:,[0]].shift(1)
     result_1 = result_1.sort_values(['Sweep_screen']).reset_index(drop=True)
 
+    #import pdb; pdb.set_trace()
+
     # get the threshold of gap length
     result_index_1 = result_1['diff_1_sweep#'][result_1['diff_1_sweep#'] >1].index.tolist()
     result_index_2 = result_1['diff_2_sweep#'][result_1['diff_2_sweep#'] >1].index.tolist()
     result_index = result_index_1 + list(set(result_index_2) - set(result_index_1))
+
+    #import pdb; pdb.set_trace()
+
+    if (df_chan_Ambient_loc.iloc[(df_chan_Ambient_loc.shape[0]-1)].Sweep_screen)+1 < df_chan_Ambient[channel].shape[0]:
+        if lower_threshold < df_chan_Ambient[channel].iloc[(df_chan_Ambient_loc.iloc[(df_chan_Ambient_loc.shape[0]-1)].Sweep_screen)+1] < upper_threshold:  
+            result_index.append(result_1.shape[0]-1)
+
     result_2 = result_1.loc[result_index].sort_values(['Sweep_screen']).reset_index(drop=True)
+
+
+    #import pdb; pdb.set_trace()
 
     result_3 = result_2.iloc[:,[0,1,2,3]]
     result_3.insert(0,'diff_1_sweep#',(result_3['Sweep_screen'].shift(-1) - result_3['Sweep_screen']).tolist())
     result_3.insert(0,'diff_2_sweep#',(result_3['Sweep_screen'] - result_3['Sweep_screen'].shift(1)).tolist())
 
-    ripple_gap = (result_3['diff_1_sweep#'] + result_3['diff_2_sweep#']).mean()*0.5  ## TO DO --> set valid ratio
-    cycle_index = result_3['diff_1_sweep#'][result_3['diff_1_sweep#'] + result_3['diff_2_sweep#']>ripple_gap].index.tolist()
-    cycle_index.append(0)
-    
-    result_4 = result_3.loc[cycle_index]
-    result_4 = result_4.sort_values(['Sweep_screen']).reset_index(drop=True)
+    ripple_gap = (result_3['diff_1_sweep#'] + result_3['diff_2_sweep#']).mean()*0.25*0.5  ## TO DO --> set valid ratio
+    cycle_index = result_3['diff_1_sweep#'][result_3['diff_1_sweep#']>ripple_gap].index.tolist()
 
+    #import pdb; pdb.set_trace()
+
+    if result_3.loc[1].Sweep_screen - result_3.loc[0].Sweep_screen > ripple_gap:
+        cycle_index.append(0)
+
+
+    if result_3.loc[result_2.shape[0]-1].Sweep_screen - result_3.loc[cycle_index[-1]].Sweep_screen > ripple_gap:
+        cycle_index.append(result_2.shape[0]-1)
+
+    cycle_index = list(set(cycle_index))
+
+
+    #import pdb; pdb.set_trace()
+    result_4 = result_3.loc[cycle_index].sort_values(['Sweep_screen']).reset_index(drop=True)
     ambient = result_4.iloc[:,[2,3,4,5]]  ## ambient --> dataframe of key points and later has all calculations
 
-    return ambient
 
 
-def get_keypoints_for_each_cycle(channel, ambient, df_chan, upper_threshold, lower_threshold):
+    #import pdb; pdb.set_trace()
+    
+    return ambient, ripple_gap
+
+
+def get_keypoints_for_each_cycle(channel, ambient, df_chan, upper_threshold, lower_threshold, ripple_gap):
     ''' Get get keypoints each cycle of a non-ambient channel (Thermal Shock) '''
 
     ls_cycle_bound = [] ## bounds rand to search each cycle for key points
@@ -184,15 +222,15 @@ def get_keypoints_for_each_cycle(channel, ambient, df_chan, upper_threshold, low
         else:  ## not last cycle in loop 
             ls_cycle_bound.append(ambient.iloc[[4*i,ambient.shape[0]-1]].Sweep_screen.tolist())
 
-        if ls_cycle_bound[i][0] < 5: ## at beginning of profile (sweep screen smaller than 5)
+        if ls_cycle_bound[i][0] < int(ripple_gap): ## at beginning of profile (sweep screen smaller than 5)
             ls_cycle_bound[i][0] = 0
         else: ## not at beginning
-            ls_cycle_bound[i][0] = ls_cycle_bound[i][0] - 5
+            ls_cycle_bound[i][0] = ls_cycle_bound[i][0] - int(ripple_gap)
 
-        if ls_cycle_bound[i][1] > ambient.Sweep_screen[ambient.shape[0]-1] - 5: ## at end
+        if ls_cycle_bound[i][1] > ambient.Sweep_screen[ambient.shape[0]-1] - int(ripple_gap): ## at end
             ls_cycle_bound[i][1] = ambient.Sweep_screen[ambient.shape[0]-1]
         else:  ## not at end
-            ls_cycle_bound[i][1] = ls_cycle_bound[i][1] + 5
+            ls_cycle_bound[i][1] = ls_cycle_bound[i][1] + int(ripple_gap)
 
         ls_cycle_component = df_chan.iloc[ls_cycle_bound[i][0]:ls_cycle_bound[i][1]]
         ls_cycle_component.insert(0,'cycle#',i+1)
@@ -207,11 +245,10 @@ def get_keypoints_for_each_cycle(channel, ambient, df_chan, upper_threshold, low
         for n in range(int(len(high_index))):
             point_index.append(high_index[n])   
 
-        point_index = np.sort(point_index)
-        point_index = point_index.tolist()
+        point_index = np.sort(point_index).tolist()
         point_cycle_index.append(point_index)
         ls_cycle[i] = ls_cycle[i].loc[point_cycle_index[i]]
-    
+
         ## Gap point
         result_1 = ls_cycle[i]
 
@@ -223,23 +260,30 @@ def get_keypoints_for_each_cycle(channel, ambient, df_chan, upper_threshold, low
         result_index_1 = result_2['diff_1_sweep#'][result_2['diff_1_sweep#'] >1].index.tolist()
         result_index_2 = result_2['diff_2_sweep#'][result_2['diff_2_sweep#'] >1].index.tolist()
         result_index = result_index_1 + list(set(result_index_2) - set(result_index_1))
+
         result= result_2.loc[result_index].sort_values(['Sweep_screen']).reset_index(drop=True)
-    
+
+
         if result.shape[0]< 5 and i!=ambient.shape[0]//4-1:
             n_reach.append(result)
             n_reach_cycle.append(i)
         elif result.shape[0]< 4 and i ==ambient.shape[0]//4-1:
             n_reach.append(result)
             n_reach_cycle.append(i)
+        elif result.shape[0]>3 and i ==ambient.shape[0]//4-1:
+            result_points = result.iloc[:,[0,1,2,3,4]]
+            key_point_cycle.append(result_points)
+
         else:
             result_points = result.iloc[:,[0,1,2,3,4]]
             result_points = result_points.iloc[0:4]
             key_point_cycle.append(result_points)
 
+
     for cycle in n_reach_cycle:  ## remove cycles that DID NOT reach from cycle list 
         cycle_ls.remove(cycle)
 
-    return key_point_cycle, cycle_ls, result, n_reach
+    return key_point_cycle, cycle_ls, result, n_reach, n_reach_cycle
 
 
 ########### Determine Starting Point Case (e.g. - up-ramp, down-ramp, high-soak, low-soak)

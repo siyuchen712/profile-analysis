@@ -74,8 +74,8 @@ def ambient_analysis(df, channels, amb, upper_threshold, lower_threshold, date_f
     for i in range(df_chan_Ambient.shape[0]):
         sweep_screen.append(i)
     df_chan_Ambient.insert(0,'Sweep_screen',pd.Series(sweep_screen, index=df_chan_Ambient.index).tolist())
-    df_chan_Ambient_loc = get_points_above_and_below_thresholds(df_chan_Ambient, channels[0], upper_threshold, lower_threshold)
-    ambient, ripple_gap = get_amb_key_points(df_chan_Ambient, channels[0], df_chan_Ambient_loc, upper_threshold, lower_threshold)
+    df_chan_Ambient_loc = get_points_above_and_below_thresholds(df_chan_Ambient, amb, upper_threshold, lower_threshold)
+    ambient, ripple_gap = get_amb_key_points(df_chan_Ambient, amb, df_chan_Ambient_loc, upper_threshold, lower_threshold)
     ambient = calculate_ramp_stats(amb, ambient, df_chan_Ambient_loc, date_format)
 
     ## differentiate profile starting point

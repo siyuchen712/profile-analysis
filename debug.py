@@ -2,7 +2,7 @@
 from core.data_import import *
 from core.ptc_analysis import *
 from core.ptc_helpers import *
-
+from core.plot import *
 
 def define_test_parameters(datapath):
     file_extension = datapath.split('.')[-1]
@@ -37,13 +37,12 @@ ambient_channel_number = 1
 ## DATA IMPORT
 df, channels, amb, amb_errors = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep=sep)
 
-## PLOT
-#plot_profile(TITLE, df, channels)
-
 ## ANALYSIS
 tc_channel_names = {}
 for chan in channels:
     tc_channel_names[chan] = ''
+#PLOT
+plot_profile(test_name, df, channels, tc_channel_names)
 
 ptc_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
 

@@ -171,7 +171,6 @@ def set_low_soak(ambient):
 
 ########### Analysis Summary
 def create_analysis_summary(channel, amb, df_soak_high, df_soak_low, df_transform_down, df_transform_up):
-
     if channel == amb:
         soak_columns_wo_cyc = [5,8,9,10]
         transform_columns_amb = [5,6,7]
@@ -258,6 +257,7 @@ def df_keypoints(channel, df_chan_Ambient, upper_threshold, lower_threshold):
             key_point.append(max(consecutive_points, key=len)[0])
             key_point.append(max(consecutive_points, key=len)[-1])
     if key_point[0] == 0: key_point.remove(0)
+    if key_point[-1] == df_chan_Ambient.shape[0]-1: del key_point[-1]
 
     ambient = df_chan_Ambient.iloc[key_point].sort_values(['Sweep_screen']).reset_index(drop=True)
 

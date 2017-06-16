@@ -18,7 +18,7 @@ from core.tshock_helpers import *
 def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name):
 
     writer = create_wb(test_name) ## create workbook
-    
+    print('inside tshock_analyze_all_channels...')
     ## analyze ambient
     amb_upper_threshold = upper_threshold - tolerance
     amb_lower_threshold = lower_threshold + tolerance
@@ -39,8 +39,7 @@ def tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names,
         print(channel)
         if channel != amb:
             result_each_cycle, df_summary_tc, n_reach_summary = pd.DataFrame(), pd.DataFrame(), pd.DataFrame() ## ensure reset
-          
-            result_each_cycle, df_summary_tc,  content_instruction = single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_threshold, date_format, cycle_amount)
+            result_each_cycle, df_summary_tc, content_instruction = single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_threshold, date_format, cycle_amount)
             if tc_channel_names[channel]:
                 if file_extension == 'csv':
                     tc_name = tc_channel_names[channel] + ' (' + channel.split(' ')[1] + ')'
@@ -65,6 +64,7 @@ def ambient_analysis(df, channels, amb, upper_threshold, lower_threshold, date_f
     ''' Analysis for ambient channel '''
 
     ## get the big gap of ambient (channel_1)
+    print('inside ambient_analysis...')
     df_chan_Ambient = df[['Sweep #', 'Time', amb]].sort_values(['Sweep #']).reset_index(drop=True)
     sweep_screen = []
     for i in range(df_chan_Ambient.shape[0]):

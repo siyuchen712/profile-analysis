@@ -4,9 +4,9 @@ from core.tshock_helpers import *
 from core.data_import import *
 
 #datapath = r"C:\Users\s.chen6\Desktop\6_8.csv"
-#datapath = r"L:\Automotive_Lighting\LED\Test Engineering\Siyu Chen\Data files for Siyu\20151125_153850940\dat00001.csv"
+datapath = r"L:\Automotive_Lighting\LED\Test Engineering\Siyu Chen\Data files for Siyu\20151125_153850940\dat00001.csv"
 #datapath = r"L:\Automotive_Lighting\LED\Test Engineering\Siyu Chen\Data files for Siyu\20000131_062031968\dat00001.csv"
-datapath = r"C:\Users\s.chen6\Desktop\dat00002.csv"
+#datapath = r"C:\Users\s.chen6\Desktop\dat00002.csv"
 
 
 file_extension = 'csv'

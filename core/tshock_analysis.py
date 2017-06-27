@@ -144,9 +144,9 @@ def single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_th
     ### Create summary
     result_each_cycle, df_summary = create_analysis_summary(amb, amb, df_soak_high, df_soak_low, df_transform_down, df_transform_up)
     if n_reach_ls_period == []: 
-        content_instruction = ['Every cycle of this channel can reach the threshold!\n\nThe First Table: List out the summary table.', 'The Second Table: Calculate result for cycle of this channel.', 'Analysis Finished!']
+        content_instruction = ['Version 2.0\n\nIn this tshock test file, every cycle can reach the threshold!\n\nThe First Table: List out the summary table.', 'The Second Table: Calculate result for cycle of this channel.', 'Analysis Finished!']
     else:
-    	content_instruction = ['Not every cycle of this channel can reach the threshold!\n\nThe First Table: List out the summary table.', 'The Second Table: Calculate result for cycle of this channel.', 'Analysis Finished!']
+    	content_instruction = ['Version 2.0\n\nIn this tshock test file, not every cycle of this channel can reach the threshold!\n\nThe First Table: List out the summary table.', 'The Second Table: Calculate result for cycle of this channel.', 'Analysis Finished!']
 
     return result_each_cycle, df_summary, content_instruction
 

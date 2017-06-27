@@ -22,16 +22,15 @@ def import_data_with_date_index(datapath, ambient_channel_number, regex_temp, da
     df = read_data_for_plot(datapath, date_format, sep, file_extension)
     channels = get_channels(df, regex_temp)
     amb = set_ambient(channels, ambient_channel_number)
-    df, errors = drop_errors(df, channels)
-    return df, channels, amb, errors
+    df = drop_errors(df, channels)
+    return df, channels, amb
 
 def import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep):
     ''' Main import function without date index (for analysis using sweep #) '''
     df = read_data_for_analysis(datapath, sep=sep)
     channels = get_channels(df, regex_temp)
     amb = set_ambient(channels, ambient_channel_number)
-    df, errors = drop_errors(df, channels)
-    return df, channels, amb, errors
+    return df, channels, amb
 
 
 
@@ -71,4 +70,4 @@ def drop_errors(df, channels):
         df = df[df[channel] < 150]
         df = df[df[channel] > -100]
     errors = df_copy[~df_copy.index.isin(df.index.tolist())]
-    return df, errors
+    return df

@@ -216,15 +216,15 @@ class AnalyzeButton(QPushButton):
             print('Amb Channel:', ambient_channel_number)
 
             ### Do plot
-            df, channels, amb, errors = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension)  ## df time indexed
+            df, channels, amb = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension)  ## df time indexed
             plot_profile(test_name, df, channels, tc_channel_names)  ## plot with ploty
             
             ### Do analysis
-            df, channels, amb, amb_errors = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep) ## df raw for analysis
+            df, channels, amb = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep) ## df raw for analysis
             if test_type == 'Thermal Shock': 
-                tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
+                tshock_analyze_all_channels(df, channels, amb, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
             elif test_type == 'PTC':
-                ptc_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
+                ptc_analyze_all_channels(df, channels, amb, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
             print('\nANALYSIS COMPLETE.')
         else:
             print('\n', 'All user inputs must be filled before analysis can be conducted. Please fill in the required fields.')

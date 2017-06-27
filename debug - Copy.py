@@ -5,15 +5,14 @@ from core.data_import import *
 
 from core.plot import *
 
-
 #datapath = r"C:\Users\s.chen6\Desktop\test.csv"
-#datapath = r"C:\Users\s.chen6\Desktop\slow tshock.csv"
+#datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\Fast TShock (MCA)\Raw Data - Fast TShock (MCA -40 to 95).csv"
 datapath = r"C:\Users\s.chen6\Desktop\profile-analysis-2.0\test_data\dat00002.csv"
-#datapath = r"L:\Automotive_Lighting\LED\Test Engineering\Siyu Chen\Data files for Siyu\20000131_062031968\dat00001.csv"
+#datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\Fast TShock (MCA)\Raw Data - Fast TShock (MCA -40 to 95).csv"
 
 
 file_extension = 'csv'
-test_name = '002'
+test_name = 'fast'
 upper_threshold, lower_threshold = 95, -40
 tolerance = 3
 rate_adjustment = 0
@@ -24,7 +23,7 @@ date_format = '%m/%d/%Y %H:%M:%S:%f'
 regex_temp = '^Chan\s[0-9][0-9][0-9]'
 
 
-df, channels, amb, amb_errors = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep=',')
+df, channels, amb = import_data_without_date_index(datapath, ambient_channel_number, regex_temp, sep=',')
 
 
 ## PLOT
@@ -38,5 +37,5 @@ for chan in channels:
 #PLOT
 #plot_profile(test_name, df, channels, tc_channel_names)
 #analyze_all_channels(df, channels, amb)
-tshock_analyze_all_channels(df, channels, amb, amb_errors, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
+tshock_analyze_all_channels(df, channels, amb, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
     

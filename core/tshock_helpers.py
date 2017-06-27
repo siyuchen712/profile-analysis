@@ -47,8 +47,8 @@ def df_instruction(worksheet, row, text):
 ########### Soak and Ramp Analysis
 def soak_analysis(channel_name, amb, ambient, df_chan_Ambient, ls_index_cold, ls_index_hot, start_index_list):
     
-    df_soak_low = ambient.loc[ls_index_cold].sort_values(['Sweep_screen']).reset_index(drop=True)
-    df_soak_high = ambient.loc[ls_index_hot].sort_values(['Sweep_screen']).reset_index(drop=True)
+    df_soak_low = ambient.loc[ls_index_cold].reset_index(drop=True)
+    df_soak_high = ambient.loc[ls_index_hot].reset_index(drop=True)
 
     ## replace first keypoint 0 index with 4
     #reset_start_index_list = [4 if i==0 else i for i in start_index_list]
@@ -85,17 +85,19 @@ def soak_analysis(channel_name, amb, ambient, df_chan_Ambient, ls_index_cold, ls
             max_temp_low.append(np.nan)
             min_temp_low.append(np.nan)
         else:
-            df_temp_low = df_chan_Ambient.iloc[int(ambient.iloc[cold]['Sweep_screen']):int(ambient.iloc[up]['Sweep_screen'])+1,[3]]
+            df_temp_low = df_chan_Ambient.iloc[int(ambient.iloc[cold]['Sweep_screen'])-1:int(ambient.iloc[up]['Sweep_screen'])]
+            df_temp_low = df_temp_low[[channel_name]]
             mean_temp_low.append(df_temp_low.mean(axis=0).ix[0])
             max_temp_low.append(df_temp_low.max(axis=0).ix[0])
             min_temp_low.append(df_temp_low.min(axis=0).ix[0])
+
         if ambient.iloc[hot]['Sweep_screen'] == ambient.iloc[down]['Sweep_screen']:
             mean_temp_high.append(np.nan)
             max_temp_high.append(np.nan)
             min_temp_high.append(np.nan)
-
         else:
-            df_temp_high = df_chan_Ambient.iloc[int(ambient.iloc[hot]['Sweep_screen']):int(ambient.iloc[down]['Sweep_screen'])+1,[3]]
+            df_temp_high = df_chan_Ambient.iloc[int(ambient.iloc[hot]['Sweep_screen'])-1:int(ambient.iloc[down]['Sweep_screen'])]
+            df_temp_high = df_temp_high[[channel_name]]
             mean_temp_high.append(df_temp_high.mean(axis=0).ix[0])
             max_temp_high.append(df_temp_high.max(axis=0).ix[0])
             min_temp_high.append(df_temp_high.min(axis=0).ix[0])
@@ -110,8 +112,8 @@ def soak_analysis(channel_name, amb, ambient, df_chan_Ambient, ls_index_cold, ls
 
 
 def ramp_analysis(ambient, df_chan_Ambient, ls_index_down, ls_index_up):
-    df_transform_down = ambient.loc[ls_index_down].sort_values(['Sweep_screen']).reset_index(drop=True)
-    df_transform_up =ambient.loc[ls_index_up].sort_values(['Sweep_screen']).reset_index(drop=True)
+    df_transform_down = ambient.loc[ls_index_down].reset_index(drop=True)
+    df_transform_up =ambient.loc[ls_index_up].reset_index(drop=True)
     return df_transform_down, df_transform_up
 
 
@@ -122,7 +124,7 @@ def calculate_ramp_stats(channel_name, ambient, date_format):
     for m in range(0, ambient.shape[0]-1):
         a1 = ambient['Time'][m+1]
         a2 = ambient['Time'][m]
-        if check.iloc[m][1] == True: 
+        if check.iloc[m][1] == True or check.iloc[m+1][1] == True: 
             time.append(np.nan)
         else: time.append((datetime.strptime(a1, date_format) - datetime.strptime(a2, date_format)).total_seconds())
     time.append(np.nan)
@@ -136,48 +138,67 @@ def calculate_ramp_stats(channel_name, ambient, date_format):
     # Find ramp rates
     ambient['ramp_rate'] = pd.Series(np.nan)
     ambient['ramp_rate'] = ambient['ramp_temp']*60/ambient['duration']
+
     return ambient
 
 ########### Determine Starting Point Case (e.g. - up-ramp, down-ramp, high-soak, low-soak)
 def find_starting_point_case(amb, ambient, upper_threshold, lower_threshold):
-    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
+    check = ambient.isnull()
     ls_sweepnum = ambient.Sweep_screen.tolist()
-    if all_same(ls_sweepnum) == True:  
+    if all_same(ls_sweepnum) == True:
         ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
     elif all_same(ls_sweepnum) == False:
         for i in range(0, ambient.shape[0], 4):
-            startcase = ambient.iloc[i:i+4]
+            startcase = ambient.iloc[i:i+5]
             ls_startcase = startcase.Sweep_screen.tolist()
             if all_same(ls_startcase) == False:
-
-                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]<0 and startcase.iloc[0]['Sweep_screen'] !=startcase.iloc[1]['Sweep_screen']:
+                
+                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]<0:
                     ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
                     break
-                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]>0 and startcase.iloc[0]['Sweep_screen'] !=startcase.iloc[1]['Sweep_screen']:
+                if startcase.iloc[2][amb]>0 and startcase.iloc[3][amb]>0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
+                    break
+                if startcase.iloc[3][amb]>0 and startcase.iloc[4][amb]<0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
+                    break
+
+                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]>0:
                     ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_high_soak(ambient)
                     break
-                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]>0 and startcase.iloc[0]['Sweep_screen'] !=startcase.iloc[1]['Sweep_screen']:
-                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_up(ambient)
+                if startcase.iloc[2][amb]<0 and startcase.iloc[3][amb]<0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_high_soak(ambient)
                     break
-                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]<0 and startcase.iloc[0]['Sweep_screen'] !=startcase.iloc[1]['Sweep_screen']:
+                if startcase.iloc[3][amb]<0 and startcase.iloc[4][amb]>0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_high_soak(ambient)
+                    break
+
+                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]<0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_down(ambient)
+                    break
+                if startcase.iloc[2][amb]<0 and startcase.iloc[3][amb]>0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_down(ambient)
+                    break
+                if startcase.iloc[3][amb]>0 and startcase.iloc[4][amb]>0:
                     ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_down(ambient)
                     break
 
-                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]>0 and startcase.iloc[2][amb]>0: 
+                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]>0:
                     ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_up(ambient)
                     break
-                if startcase.iloc[0][amb]<0 and startcase.iloc[1][amb]<0 and startcase.iloc[2][amb]>0: 
-                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
+                if startcase.iloc[2][amb]>0 and startcase.iloc[3][amb]<0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_up(ambient)
                     break
-                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]<0 and startcase.iloc[2][amb]<0: 
-                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_down(ambient)
-                    break
-                if startcase.iloc[0][amb]>0 and startcase.iloc[1][amb]>0 and startcase.iloc[2][amb]<0: 
-                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_high_soak(ambient)
+                if startcase.iloc[3][amb]<0 and startcase.iloc[4][amb]<0:
+                    ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_transform_up(ambient)
                     break
 
                 else: continue
             else: continue
+    try:
+        ls_index_down # does a exist in the current namespace
+    except NameError:
+        ls_index_down, ls_index_up, ls_index_cold, ls_index_hot = set_low_soak(ambient)
 
     return ls_index_down, ls_index_up, ls_index_cold, ls_index_hot
 
@@ -231,8 +252,8 @@ def create_analysis_summary(channel, amb, df_soak_high, df_soak_low, df_transfor
         ls_std.append(result_each_cycle.ix[:,i].std())
         ls_max.append(result_each_cycle.ix[:,i].max())
         ls_min.append(result_each_cycle.ix[:,i].min())
-        ls_min_cid.append(result_each_cycle.ix[:,i].idxmin())
-        ls_max_cid.append(result_each_cycle.ix[:,i].idxmax())
+        ls_min_cid.append(result_each_cycle.ix[:,i].idxmin()+1)
+        ls_max_cid.append(result_each_cycle.ix[:,i].idxmax()+1)
 
     summary_label = cycles_label[1:]
 
@@ -250,19 +271,21 @@ def all_same(items):
 
 
 def df_keypoints(channel, df_chan_Ambient, upper_threshold, lower_threshold):
+
     lower = df_chan_Ambient[df_chan_Ambient[channel] < 0]
     upper = df_chan_Ambient[df_chan_Ambient[channel] >= 0]
+
     lower.insert(0,'diff_sweep_last',lower['Sweep_screen'] - lower['Sweep_screen'].shift(1)) 
     lower.insert(0,'diff_sweep_next',lower['Sweep_screen'].shift(-1) - lower['Sweep_screen']) 
     cycle_index_last = lower['diff_sweep_last'][lower['diff_sweep_last']>2].index.tolist()
     cycle_index_next = lower['diff_sweep_next'][lower['diff_sweep_next']>2].index.tolist()
     cycle_index = cycle_index_last + list(set(cycle_index_next) - set(cycle_index_last))
     cycle_index = sorted(cycle_index)
+
     ####Get all the key points
     if cycle_index[0] != lower.iloc[0].Sweep_screen: cycle_index.append(lower.iloc[0].Sweep_screen)
     if cycle_index[-1] != lower.iloc[lower.shape[0]-1].Sweep_screen: cycle_index.append(lower.iloc[lower.shape[0]-1].Sweep_screen)
     lower_key = lower.loc[cycle_index].sort_values(['Sweep_screen']).index.tolist()
-
     channel_period = []
     key_point = []
     n_reach_ls_period = []
@@ -273,10 +296,10 @@ def df_keypoints(channel, df_chan_Ambient, upper_threshold, lower_threshold):
             channel_period.append([lower_key[i], lower_key[i+1]])
         if df_chan_Ambient[channel].iloc[lower_key[i]] < 0 and df_chan_Ambient[channel].iloc[lower_key[i+1]] < 0:
             channel_period.append([lower_key[i], lower_key[i+1]])
-    channel_period.append([lower_key[i+1], df_chan_Ambient.shape[0]])
-    channel_period.insert(0,[0,channel_period[0][0]])
-
-    if channel_period[0] == [0,0]: channel_period.remove([0,0])
+    channel_period.append([lower_key[i+1], df_chan_Ambient.shape[0]-1])
+    channel_period.insert(0,[1,channel_period[0][0]])
+    if channel_period[0] == [1,1]: channel_period.remove([1,1])
+    if channel_period[-1] == [df_chan_Ambient.shape[0]-1,df_chan_Ambient.shape[0]-1]: channel_period.remove([df_chan_Ambient.shape[0]-1,df_chan_Ambient.shape[0]-1])
 
     for i in range(len(channel_period)):
         if df_chan_Ambient[channel].iloc[channel_period[i][0]:channel_period[i][1]].mean() > 0:
@@ -286,26 +309,34 @@ def df_keypoints(channel, df_chan_Ambient, upper_threshold, lower_threshold):
         
         ls_period = sorted(ls_period)
         if len(ls_period)<2 :
-            if consecutive_points == []: 
-                key_point.append(0)
-                key_point.append(0)
-
-            elif consecutive_points != []:
-                key_point.append(max(consecutive_points, key=len)[-1])
-                key_point.append(max(consecutive_points, key=len)[-1])
-            n_reach_ls_period.append(channel_period[i])
-
+            key_point.append(0)
+            key_point.append(0)
         else:
             consecutive_points = []
             for k, g in itertools.groupby(enumerate(ls_period), lambda x: x[1]-x[0] ) :
                 consecutive_points.append(list(map(itemgetter(1), g)))
-                consecutive_points.reverse()
+            consecutive_points.reverse()
             key_point.append(max(consecutive_points, key=len)[0])
             key_point.append(max(consecutive_points, key=len)[-1])
+
+    if key_point[0] == 1: key_point.remove(1)
+    if key_point[0] == 1: key_point.remove(1)
     if key_point[0] == 0: key_point.remove(0)
     if key_point[0] == 0: key_point.remove(0)
-    if key_point[-1] == df_chan_Ambient.shape[0]-1: del key_point[-1]
+    #if key_point[-1] == df_chan_Ambient.shape[0]-1: del key_point[-1]
 
     ambient = df_chan_Ambient.iloc[key_point].reset_index(drop=True)
 
     return ambient, n_reach_ls_period
+
+
+def drop_errors_channel(df, channel):
+    ''' Get rid of outrage data and output error list '''
+    df_chan_selected = df[['Sweep #', 'Time', channel]].sort_values(['Sweep #']).reset_index(drop=True)
+
+    df_chan_selected = df_chan_selected[df_chan_selected[channel] < 150]
+    df_chan_selected = df_chan_selected[df_chan_selected[channel] > -150]
+
+    errors = df_chan_selected[~df_chan_selected.index.isin(df.index.tolist())]
+
+    return df_chan_selected, errors

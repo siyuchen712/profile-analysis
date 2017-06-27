@@ -101,9 +101,9 @@ def ambient_analysis(df, channels, amb, upper_threshold, lower_threshold, date_f
     cycle_amount = len(result_each_cycle)
     
     if n_reach_ls_period == []: 
-        content_instruction = ['In this test file, there are '+ str(cycle_amount) +' cycles.\n\nThe First Table: List out the test data that have reading error.', 'The Second Table: Summary table for the ambient.', 'The Third Table: List out the calculation result for each cycle of ambient.']
+        content_instruction = ['Version 2.0\n\nIn this PTC test file, there are '+ str(cycle_amount) +' cycles.\n\nThe First Table: List out the test data that have reading error.', 'The Second Table: Summary table for the ambient.', 'The Third Table: List out the calculation result for each cycle of ambient.']
     else: 
-        content_instruction = ['In this test file, there are '+ str(cycle_amount) +' cycles.\n\nThe First Table: List out the test data that have reading error.', 'The Second Table: Summary table for the ambient.\n\nNot every cycle reached the threshold!', 'The Third Table: List out the calculation result for each cycle of ambient.']
+        content_instruction = ['Version 2.0\n\nIn this PTC test file, there are '+ str(cycle_amount) +' cycles.\n\nThe First Table: List out the test data that have reading error.', 'The Second Table: Summary table for the ambient.\n\nNot every cycle reached the threshold!', 'The Third Table: List out the calculation result for each cycle of ambient.']
 
     return result_each_cycle, df_summary, ambient, content_instruction, cycle_amount
 

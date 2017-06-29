@@ -7,7 +7,7 @@ from core.plot import *
 
 #datapath = r"C:\Users\s.chen6\Desktop\test.csv"
 #datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\Fast TShock (MCA)\Raw Data - Fast TShock (MCA -40 to 95).csv"
-datapath = r"C:\Users\bruno\Desktop\profile-analysis-6-27\profile-analysis-6-27\test_data\opentcs.csv"
+datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\Fast TShock (MCA)\Raw Data - Fast TShock (MCA -40 to 95).csv"
 #datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\Fast TShock (MCA)\Raw Data - Fast TShock (MCA -40 to 95).csv"
 
 
@@ -35,7 +35,7 @@ tc_channel_names = {}
 for chan in channels:
     tc_channel_names[chan] = ''
 #PLOT
-plot_profile(test_name, df, channels, tc_channel_names)
+#plot_profile(test_name, df, channels, tc_channel_names)
 #analyze_all_channels(df, channels, amb)
 tshock_analyze_all_channels(df, channels, amb, tc_channel_names, upper_threshold, lower_threshold, tolerance, rate_adjustment, date_format, file_extension, test_name)
     

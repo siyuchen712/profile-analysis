@@ -20,7 +20,7 @@ def define_test_parameters(datapath):
 
 
 
-datapath = r"C:\Users\s.chen6\Desktop\profile-analysis-3.0 - Copy\test_data\20170206_184930_P552 MCA PV PTC_01_B3.txt"
+datapath = r"\\Chfile1\ecs_landrive\Automotive_Lighting\LED\Test Engineering\E2E Testing\Profile Program\PTC\PTC (A1XC -40 to 70).csv"
 #datapath = r"L:\Automotive_Lighting\LED\P552 MCA Headlamp\P552 MCA Aux\ADVPR\PV Aux\TL A&B\PTC\Raw Data\20170206_184930_P552 MCA PV PTC_01_B4.txt"
 #datapath = r"C:\Users\s.chen6\Desktop\test.csv"
 #datapath = r"L:\Automotive_Lighting\LED\P552 MCA Headlamp\P552 MCA Aux\ADVPR\PV Aux\TL A&B\PTC\Raw Data\20170206_184930_P552 MCA PV PTC_01_B6.txt"

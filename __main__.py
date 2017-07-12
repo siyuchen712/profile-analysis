@@ -217,8 +217,13 @@ class AnalyzeButton(QPushButton):
 
             ### Do plot
             df, channels, amb = import_data_with_date_index(datapath, ambient_channel_number, regex_temp, date_format, sep, file_extension)  ## df time indexed
+            
+
             try:
-                plot_profile(test_name, df, channels, tc_channel_names)  ## plot with ploty
+                if rate_adjustment:
+                    plot_profile_ra(upper_threshold, lower_threshold, tolerance, rate_adjustment, test_name, df, channels, tc_channel_names)  ## plot with ploty
+                else: plot_profile(upper_threshold, lower_threshold, tolerance, test_name, df, channels, tc_channel_names)  ## plot with ploty
+
             except:
                 print('There was an error with the Plotly API')
             ### Do analysis

@@ -43,7 +43,7 @@ def tshock_analyze_all_channels(df, channels, amb, tc_channel_names, upper_thres
         if channel != amb:
             df_channel, errors_channel = drop_errors_channel(df, channel)
             result_each_cycle, df_summary_tc, n_reach_summary = pd.DataFrame(), pd.DataFrame(), pd.DataFrame() ## ensure reset
-            result_each_cycle, df_summary_tc, content_instruction = single_channel_analysis(df_channel, channel, amb, ambient, upper_threshold, lower_threshold, date_format, cycle_amount)
+            result_each_cycle, df_summary_tc, content_instruction = single_channel_analysis(df, channel, amb, ambient, upper_threshold, lower_threshold, date_format, cycle_amount)
             if tc_channel_names[channel]:
                 if file_extension == 'csv':
                     tc_name = tc_channel_names[channel] + ' (' + channel.split(' ')[1] + ')'

@@ -48,7 +48,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
 **1. Temporal Plotting**
 
 **2. Summary Tables with basic statistics**
-* List out outrage data
+* List out outrage data (Usually because of reading errors or opened thermal couple)
 * Statistic summary of all the cycles
 * List out all the calculate result of each cycle: (the attributes listed as below)
    * Cold_soak_duration_minute
@@ -115,7 +115,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
 
 * [Python3](https://www.python.org/)
 * [Pandas](http://pandas.pydata.org/) - Data wrangling and processing
-* [Matplotlib](https://plot.ly/python/) - Plotting and histograms
+* [Matplotlib](https://plot.ly/python/) - Plotting
 * [XlsWriter](http://xlsxwriter.readthedocs.io/) - Creates analysis tables
 * [PyQt5](https://pypi.python.org/pypi/PyQt5) - GUI
 

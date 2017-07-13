@@ -110,6 +110,14 @@ This program can only analyze the cycles that can reach the threshold, but will 
 
    * Each tab of the output excel represent one channel.
    * Each sheet is consisted with 3 tables as this instruction mentioned above.
+   
+**5. Independency**
+
+* [Python3](https://www.python.org/)
+* [Pandas](http://pandas.pydata.org/) - Data wrangling and processing
+* [Matplotlib](https://plot.ly/python/) - Plotting and histograms
+* [XlsWriter](http://xlsxwriter.readthedocs.io/) - Creates analysis tables
+* [PyQt5](https://pypi.python.org/pypi/PyQt5) - GUI
 
 ## Authors
 

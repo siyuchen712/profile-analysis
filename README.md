@@ -66,7 +66,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
    * Up_RAMP_temp_c
    * Up_RAMP_rate_c/minute
 
-### Introduction
+## Introduction
 **1. Gui**
 
 ![Gui UI](/images/tshock_gui.PNG)

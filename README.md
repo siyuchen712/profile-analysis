@@ -89,7 +89,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
 
 ![Analyze](/images/notification.PNG)
 
-   * In this interface, the notification can show the progress of analysis, and also can show how the channel start.
+   * In this interface, the notification can show the progress of analysis, and also can show how the channel start.
    
 **3. Plotting**
 

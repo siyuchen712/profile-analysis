@@ -93,16 +93,16 @@ This program can only analyze the cycles that can reach the threshold, but will 
    
 **3. Plotting**
 
-![general_graph](/images/general_plot.PNG)
+![general_graph](/images/general.PNG)
 
    * This is the general plot of raw testdata.
    * The X axis is the time scale and index.
    * The Y axis is the temperature(C) over that scan.
    * This graph can show only selected channels, and also can zoom in and out.
    
-![selected_graph](/images/scale_in_graph.PNG)
+![selected_graph](/images/U7.PNG)
 
-![selected_graph](/images/ambient_graph.PNG)
+![selected_graph](/images/ambient.PNG)
 
 **4. Output Excel**
 

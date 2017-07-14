@@ -99,7 +99,7 @@ def plot_profile_ra(upper_threshold, lower_threshold, tolerance, rate_adjustment
     dash_upper_ra = go.Scatter(
         x = [ls_index[0], ls_index[-1]],
         y = [upper_threshold - (upper_threshold-lower_threshold)*rate_adjustment/100, upper_threshold - (upper_threshold-lower_threshold)*rate_adjustment/100],
-        name = 'upper_threshold',
+        name = 'upper_threshold_cRA',
         line = dict(
             width = 4,
             dash = 'dashdot')
@@ -108,7 +108,7 @@ def plot_profile_ra(upper_threshold, lower_threshold, tolerance, rate_adjustment
     dash_lower_ra = go.Scatter(
         x = [ls_index[0], ls_index[-1]],
         y = [lower_threshold + (upper_threshold-lower_threshold)*rate_adjustment/100, lower_threshold + (upper_threshold-lower_threshold)*rate_adjustment/100],
-        name = 'lower_threshold',
+        name = 'lower_threshold_cRA',
         line = dict(
             width = 4,
             dash = 'dashdot')

@@ -72,7 +72,9 @@ This program can only analyze the cycles that can reach the threshold, but will 
 ![Gui UI](/images/mergeGUI.PNG)
 
    * In this interface, user give the input of this program.
-   * Choose the raw testdata file and the type of this test.
+   * Choose the folder which include the raw testdata files. 
+   * (the files could be one or many, if many, please rename them by the time order. For instance, dat00001.csv, dat00002.csv and dat00003.csv). 
+   * Choose the type of this test.
    * Give a name or discription to this datafile over Test Name box.
    * Input the Upper & Lower Threshold, and Temperate Tolerance.
    * Input Component rate adjustment if it exists.

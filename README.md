@@ -69,7 +69,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
 ### Introduction
 **1. Gui**
 
-![Gui UI](/images/tshock_gui.PNG)
+![Gui UI](/images/mergeGUI.PNG)
 
    * In this interface, user give the input of this program.
    * Choose the raw testdata file and the type of this test.
@@ -78,7 +78,7 @@ This program can only analyze the cycles that can reach the threshold, but will 
    * Input Component rate adjustment if it exists.
    
 
-![Gui UI_2](/images/tshock_gui_2.PNG)
+![Gui UI_2](/images/mergeCH.PNG)
 
    * In this interface, this program can detect there are how many channels in this test.
    * User can label out which channel is the Ambient.
